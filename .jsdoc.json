@@ -8,9 +8,15 @@
     },
     "sourceType": "module",
     "source": {
-        "include": [ "./src/" ]
+        "include": [
+            "./src/"
+        ],
+        "includePattern": ".+\\.js(doc|x)?$",
+        "excludePattern": "(^|\\/|\\\\)_"
     },
-    "plugins": ["plugins/markdown"],
+    "plugins": [
+        "plugins/markdown"
+    ],
     "markdown": {
         "hardwrap": true
     },

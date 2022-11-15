@@ -1,7 +1,6 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
 
-//import { connect, StringCodec, headers } from 'nats'
 import { NatsMessenger } from './nats_messenger'
 
 describe('NatsMessenger', () => {

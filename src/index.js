@@ -4,7 +4,7 @@
 require('babel-core/register')
 require('babel-polyfill')
 //import { connect, StringCodec, headers } from 'nats'
-import { NatsMessenger } from './nats_messenger'
+import { NatsMessenger } from './nats_messenger/nats_messenger'
 import defaults from './config'
 import _ from 'lodash'
 

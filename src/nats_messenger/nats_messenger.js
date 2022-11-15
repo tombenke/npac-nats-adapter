@@ -18,7 +18,16 @@ const hdrsToObj = (hdrs) => {
     return obj
 }
 
+/**
+ * Class representing a NATS connection and implements the Messenger interface
+ */
 export class NatsMessenger {
+    /**
+     * Create a NatsMessenger instance
+     *
+     * @param {String} uri - The URI of the NATS server
+     * @param {Object} logger - The central logger of the application
+     */
     constructor(uri, logger) {
         this.uri = uri
         this.logger = logger
@@ -66,7 +75,6 @@ export class NatsMessenger {
     /**
      * Publish payload and header to a topic
      *
-     *
      * @arg {String} topic       - The name of the topic (subject in NATS terminology) to that the message must be published.
      * @arg {String} payload     - The payload of the message.
      * @arg {Object} msgHeaders  - A flat object (key-value pairs) that represent the headers. Keys are the header names, and the values are the header values.
@@ -82,6 +90,15 @@ export class NatsMessenger {
 
         this.natsConnection.publish(topic, sc.encode(payload), { headers: hdrs })
     }
+
+    /**
+     * Subscribe to the `topic` subject, and calls the `callback` function with the inbound messages
+     * so the messages will be processed asychronously.
+     *
+     * @arg {String} topic      - The subject that the subscriber will observe.
+     * @arg {Function} callback - A function, that the subscriber will call, with the following parameters:
+     *                            `err`, `receivedPayload`, `receivedHeaders`.
+      */
 
     subscribe(topic, callback) {
         this.logger.debug(`NatsMessenger.subscribe: subscribe to topic: '${topic}'`)
@@ -100,6 +117,21 @@ export class NatsMessenger {
         })
     }
 
+    /**
+     * Send `payload` as a request message through the `subject` topic and expects a response until `timeout`.
+     * Calls the given callback with the response.
+     *
+     * @arg {String} topic - The subject to which the request will be sent.
+     * @arg {String} payload - The content part of the message.
+     * @arg {Number} timeout - Timeout in milliseconds, until the request waits for the response.
+     * @arg {Object} headers - The key-value pairs of the request headers in the form of a plain old JavaScript object.
+     *
+     * @return {Object} - It holds two properties:
+     *                      - `payload`: The payload of the response
+     *                      - `headers`: The key-value pairs of the response headers
+     *
+     * @function
+     */
     request(topic, payload, timeout, msgHeaders, reqCb) {
         this.logger.debug(
             `NatsMessenger.request.publish: topic: '${topic}', payload: '${payload}', timeout: ${timeout}, headers: ${msgHeaders}`
@@ -122,6 +154,20 @@ export class NatsMessenger {
             })
     }
 
+    /**
+     * Setup response handler
+     *
+     * Subscribes to the `topic` subject, and waits for incoming request messages.
+     * When message arrives, calls the `respCb` with the incoming message
+     * and headers and publish its return value and headers to the response subject defined by the incoming message.
+     *
+     * @arg {String} topic      - The name of the subject to wait for the request messages
+     * @arg {Function} respCb   - The response callback with arguments of `err`, `requestPayload` and `requestHeaders`.
+     *
+     * @return {Object} - The subscription object
+     *
+     * @function
+     */
     response(topic, respCb) {
         this.logger.debug(`NatsMessenger.response: assign to topic: '${topic}' callback: ${respCb}`)
         return this.natsConnection.subscribe(topic, {
@@ -143,11 +189,21 @@ export class NatsMessenger {
         })
     }
 
+    /**
+     * Drain the connection to NATS
+     *
+     * @function
+     */
     async drain() {
         this.logger.debug(`NatsMessenger.drain:`)
         await this.natsConnection.drain()
     }
 
+    /**
+     * Flushes the pending messages with NATS
+     *
+     * @function
+     */
     async flush() {
         this.logger.debug(`NatsMessenger.flush:`)
         await this.natsConnection.flush()

@@ -58,7 +58,6 @@
     "coverage": "NODE_ENV=test istanbul cover _mocha -- recursive --require babel-register --timeout 15000 'src/**/*.spec.js'",
     "coveralls": "NODE_ENV=test istanbul cover _mocha --report lcovonly -- recursive --require babel-register --timeout 15000 'src/**/*.spec.js' -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
     "docs": "rm -fr ./docs/api/* && jsdoc -c ./.jsdoc.json",
-    "docgen": "node_modules/.bin/gulp docgen",
     "prettier": "prettier --single-quote --write 'src/**/*.{js,jsx,ts,tsx,json,css,scss,md}'",
     "all": "npm run coverage && npm run build && npm run docs"
   }
