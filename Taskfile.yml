@@ -26,9 +26,9 @@ tasks:
     desc: Run all the tests.
     cmds:
       - task: format
-        #- task: dc-upd
+      - task: dc-upd
       - npm run test
-        #- task: dc-down
+      - task: dc-down
 
   coverage:
     desc: Test coverage

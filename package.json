@@ -1,7 +1,7 @@
 {
-  "name": "npac-pdms-hemera-adapter",
-  "description": "npac adapter with pdms api, using Hemera.js",
-  "version": "1.9.0",
+  "name": "npac-nats-adapter",
+  "description": "npac adapter with NATS API",
+  "version": "1.0.0",
   "keywords": [
     "cli",
     "util",
@@ -13,12 +13,12 @@
     "email": "tombenke@gmail.com"
   },
   "bugs": {
-    "url": "https://github.com/tombenke/npac-pdms-hemera-adapter/issues"
+    "url": "https://github.com/tombenke/npac-nats-adapter/issues"
   },
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "http://github.com/tombenke/npac-pdms-hemera-adapter.git"
+    "url": "http://github.com/tombenke/npac-nats-adapter.git"
   },
   "bin": {},
   "main": "./dist/index.js",
