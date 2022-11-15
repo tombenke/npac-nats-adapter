@@ -48,6 +48,7 @@ To learn more about the tool visit the [homepage](http://tombenke.github.io/npac
 
 ## References
 
+- [NATS.js - A NATS client for Node.Js](https://github.com/nats-io/nats.js#readme)
 - [npac](http://tombenke.github.io/npac).
 
 ---
