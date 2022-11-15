@@ -4,16 +4,20 @@ import { connect, StringCodec, headers } from 'nats'
 
 const objToHdrs = (msgHeadersObj) => {
     const hdrs = headers()
-    for (const property in msgHeadersObj) {
-        hdrs.append(property, msgHeadersObj[property])
+    if (msgHeadersObj) {
+        for (const property in msgHeadersObj) {
+            hdrs.append(property, msgHeadersObj[property])
+        }
     }
     return hdrs
 }
 
 const hdrsToObj = (hdrs) => {
     const obj = {}
-    for (const [key] of hdrs) {
-        obj[key] = hdrs.get(key)
+    if (hdrs) {
+        for (const [key] of hdrs) {
+            obj[key] = hdrs.get(key)
+        }
     }
     return obj
 }
@@ -77,7 +81,8 @@ export class NatsMessenger {
      *
      * @arg {String} topic       - The name of the topic (subject in NATS terminology) to that the message must be published.
      * @arg {String} payload     - The payload of the message.
-     * @arg {Object} msgHeaders  - A flat object (key-value pairs) that represent the headers. Keys are the header names, and the values are the header values.
+     * @arg {Object} msgHeaders  - A flat object (key-value pairs) that represent the headers.
+     *                             Keys are the header names, and the values are the header values.
      *
      * @function
      */
@@ -98,7 +103,7 @@ export class NatsMessenger {
      * @arg {String} topic      - The subject that the subscriber will observe.
      * @arg {Function} callback - A function, that the subscriber will call, with the following parameters:
      *                            `err`, `receivedPayload`, `receivedHeaders`.
-      */
+     */
 
     subscribe(topic, callback) {
         this.logger.debug(`NatsMessenger.subscribe: subscribe to topic: '${topic}'`)
@@ -118,7 +123,7 @@ export class NatsMessenger {
     }
 
     /**
-     * Send `payload` as a request message through the `subject` topic and expects a response until `timeout`.
+     * Send `payload` as a request message through the `topic` subject and expects a response until `timeout`.
      * Calls the given callback with the response.
      *
      * @arg {String} topic - The subject to which the request will be sent.
@@ -134,11 +139,13 @@ export class NatsMessenger {
      */
     request(topic, payload, timeout, msgHeaders, reqCb) {
         this.logger.debug(
-            `NatsMessenger.request.publish: topic: '${topic}', payload: '${payload}', timeout: ${timeout}, headers: ${msgHeaders}`
+            `NatsMessenger.request.publish: topic: '${topic}', payload: '${payload}', timeout: ${timeout}, headers: ${JSON.stringify(
+                msgHeaders
+            )}`
         )
         const sc = StringCodec()
-        const hdrs = headers() //objToHdrs(msgHeaders)
-        hdrs.append('content-type', 'application/json')
+        const hdrs = objToHdrs(msgHeaders)
+
         return this.natsConnection
             .request(topic, sc.encode(payload), {
                 timeout: timeout,
@@ -146,7 +153,7 @@ export class NatsMessenger {
             })
             .then((msg) => {
                 this.logger.debug(`NatsMessenger.request.reqCb: msg: ${msg}`)
-                reqCb(null, sc.decode(msg.data), msg.headers)
+                reqCb(null, sc.decode(msg.data), hdrsToObj(msg.headers))
             })
             .catch((err) => {
                 this.logger.error(`NatsMessenger.request.reqCb: err: ${err}`)
@@ -175,16 +182,23 @@ export class NatsMessenger {
                 const sc = StringCodec()
                 const requestPayload = sc.decode(msg.data)
                 this.logger.debug(
-                    `NatsMessenger.response.callback: received err: ${err}, msg: '${requestPayload}', headers: ${msg.headers.headers}`
+                    `NatsMessenger.response.callback: received err: ${err}, msg: '${requestPayload}', headers: ${JSON.stringify(
+                        hdrsToObj(msg.headers)
+                    )}`
                 )
                 this.logger.debug(
-                    `NatsMessenger.response.respCb: call with err: ${err}, payload: '${requestPayload}', headers: ${msg.headers.headers}`
+                    `NatsMessenger.response.respCb: call with err: ${err}, payload: '${requestPayload}', headers: ${JSON.stringify(
+                        hdrsToObj(msg.headers)
+                    )}`
                 )
-                const responsePayload = respCb(err, requestPayload, msg.headers.headers)
+                const responsePayload = respCb(err, requestPayload, hdrsToObj(msg.headers))
                 this.logger.debug(
-                    `NatsMessenger.response.respCb: respond with: payload: '${responsePayload}', headers: ${msg.headers.headers}`
+                    `NatsMessenger.response.respCb: respond with: payload: '${responsePayload}', headers: ${JSON.stringify(
+                        hdrsToObj(msg.headers)
+                    )}`
                 )
-                await msg.respond(sc.encode(responsePayload), msg.headers.headers)
+                const hdrs = objToHdrs({})
+                await msg.respond(sc.encode(responsePayload), { headers: hdrs })
             }
         })
     }

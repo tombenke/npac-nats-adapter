@@ -66,7 +66,9 @@ describe('nats', () => {
             container.logger.info(`Run job to test nats`)
             container.nats.subscribe(topic, (err, payload, headers) => {
                 const receivedPayload = JSON.parse(payload)
+                expect(err).to.be.null
                 expect(testPayload).to.eql(receivedPayload)
+                expect(testHeaders).to.eql(headers)
                 next(null, null)
             })
             container.nats.publish(topic, JSON.stringify(testPayload), testHeaders)
@@ -92,9 +94,12 @@ describe('nats', () => {
             container.logger.info(`test: Run job to test nats`)
             const resSub = container.nats.response(topic, (err, requestPayload, requestHeaders) => {
                 container.logger.info(
-                    `respCb received err: ${err}, request: ${requestPayload} headers: ${requestHeaders}`
+                    `respCb received err: ${err}, request: ${requestPayload} headers: ${JSON.stringify(requestHeaders)}`
                 )
-                //const receivedPayload = JSON.parse(requestPayload)
+                const receivedPayload = JSON.parse(requestPayload)
+                expect(err).to.be.null
+                expect(receivedPayload).to.eql(testPayload)
+                //expect(requestHeaders).to.eql(testHeaders)
                 return requestPayload
             })
 
@@ -102,11 +107,13 @@ describe('nats', () => {
                 topic,
                 JSON.stringify(testPayload),
                 1000,
-                {},
+                testHeaders,
                 (err, responsePayload, responseHeaders) => {
                     const receivedPayload = JSON.parse(responsePayload)
                     container.logger.info(
-                        `reqCb received err: ${err}, payload: ${receivedPayload}, headers: ${responseHeaders}`
+                        `reqCb received err: ${err}, payload: ${JSON.stringify(
+                            receivedPayload
+                        )}, headers: ${JSON.stringify(responseHeaders)}`
                     )
                     expect(receivedPayload).to.eql(testPayload)
                     expect(err).to.eql(null)

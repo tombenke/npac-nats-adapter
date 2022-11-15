@@ -44,7 +44,9 @@ describe('NatsMessenger', () => {
             const sub = messenger.subscribe(topic, (err, payload, headers) => {
                 console.log(`test: subscribe.callback: payload: ${payload}, headers: ${JSON.stringify(headers)}`)
                 const receivedPayload = JSON.parse(payload)
+                expect(err).to.be.null
                 expect(testPayload).to.eql(receivedPayload)
+                expect(testHeaders).to.eql(headers)
                 resolve(null)
             })
             console.log(`test: subscribed to ${sub}`)
@@ -69,42 +71,49 @@ describe('NatsMessenger', () => {
         // Setup the responder to receive and check the test message and reply to the request
         console.log(`test: Setup response`)
         messenger.response(topic, (err, payload, headers) => {
-            console.log(`response callback is called with ${payload} and respond with ${payload}`)
+            console.log(
+                `response callback is called with ${payload} headers: ${JSON.stringify(
+                    headers
+                )} and respond with ${payload}`
+            )
             const receivedPayload = JSON.parse(payload)
+            expect(err).to.be.null
             expect(testPayload).to.eql(receivedPayload)
+            expect(testHeaders).to.eql(headers)
             return payload
         })
 
         console.log(`Send request`)
-        let req = null
         const reqRes = new Promise((resolve, reject) => {
-            req = messenger
-                .request(topic, JSON.stringify(testPayload), 2000, testHeaders, (err, payload, headers) => {
-                    console.log(`err: ${err}, payload: ${payload} headers: ${headers}`)
-                    if (err) {
-                        reject(err)
-                    } else {
-                        resolve(null)
-                    }
-                })
-                .then((res) => {
-                    console.log(`req resolved: ${res}`)
-                })
-                .catch((err) => {
-                    console.log(`req error: ${err}`)
-                })
+            messenger.request(topic, JSON.stringify(testPayload), 2000, testHeaders, (err, payload, headers) => {
+                console.log(
+                    `test.request.callback: err: ${err}, payload: ${payload} headers: ${JSON.stringify(headers)}`
+                )
+                if (err) {
+                    reject(err)
+                } else {
+                    resolve(null)
+                }
+            })
+            //                .then((res) => {
+            //                    console.log(`req resolved: ${res}`)
+            //                })
+            //                .catch((err) => {
+            //                    console.log(`req error: ${err}`)
+            //                })
         })
 
-        console.log(reqRes, req)
-        reqRes
-            .then(async (res) => {
-                console.log(`res: ${res}`)
-                // Close NATS
-                await messenger.close()
-            })
-            .catch((err) => {
-                console.log(`err: ${err}`)
-            })
+        await reqRes
+        await messenger.close()
+        //        reqRes
+        //            .then(async (res) => {
+        //                console.log(`res: ${res}`)
+        //                // Close NATS
+        //                await messenger.close()
+        //            })
+        //            .catch((err) => {
+        //                console.log(`err: ${err}`)
+        //            })
     })
 
     //it('#request, #response (native)', async function () {
