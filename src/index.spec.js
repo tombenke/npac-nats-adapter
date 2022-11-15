@@ -99,8 +99,8 @@ describe('nats', () => {
                 const receivedPayload = JSON.parse(requestPayload)
                 expect(err).to.be.null
                 expect(receivedPayload).to.eql(testPayload)
-                //expect(requestHeaders).to.eql(testHeaders)
-                return requestPayload
+                expect(requestHeaders).to.eql(testHeaders)
+                return { payload: requestPayload, headers: requestHeaders }
             })
 
             container.nats.request(

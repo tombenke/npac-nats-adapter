@@ -191,14 +191,14 @@ export class NatsMessenger {
                         hdrsToObj(msg.headers)
                     )}`
                 )
-                const responsePayload = respCb(err, requestPayload, hdrsToObj(msg.headers))
+                const { payload = '', headers = {} } = respCb(err, requestPayload, hdrsToObj(msg.headers))
                 this.logger.debug(
-                    `NatsMessenger.response.respCb: respond with: payload: '${responsePayload}', headers: ${JSON.stringify(
-                        hdrsToObj(msg.headers)
+                    `NatsMessenger.response.respCb: respond with: payload: '${payload}', headers: ${JSON.stringify(
+                        headers
                     )}`
                 )
-                const hdrs = objToHdrs({})
-                await msg.respond(sc.encode(responsePayload), { headers: hdrs })
+                const hdrs = objToHdrs(headers)
+                await msg.respond(sc.encode(payload), { headers: hdrs })
             }
         })
     }
