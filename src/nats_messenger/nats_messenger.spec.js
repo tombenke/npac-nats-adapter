@@ -15,6 +15,7 @@ describe('NatsMessenger', () => {
         done()
     })
 
+    const testConnectOpts = { servers: ['nats://localhost:4222'], debug: true }
     const testPayload = { note: 'text...', number: 42, floatValue: 42.24 }
     const topic = 'test-topic'
     const testHeaders = {
@@ -24,19 +25,19 @@ describe('NatsMessenger', () => {
     }
 
     it('#constructor', async () => {
-        const messenger = new NatsMessenger('nats://localhost:4222', console)
+        const messenger = new NatsMessenger(testConnectOpts, console)
         expect(messenger).to.not.eql(null)
     })
 
     it('#start, stop', async () => {
-        const messenger = new NatsMessenger('nats://localhost:4222', console)
+        const messenger = new NatsMessenger(testConnectOpts, console)
         await messenger.start()
         await messenger.close()
     })
 
     it('#publish, #subscribe', async () => {
         // Create and start NATS Messenger
-        const messenger = new NatsMessenger('nats://localhost:4222', console)
+        const messenger = new NatsMessenger(testConnectOpts, console)
         await messenger.start()
 
         // Setup a subscriber to receive and check the test message
@@ -65,7 +66,7 @@ describe('NatsMessenger', () => {
 
     it('#request, #response', async function () {
         // Create and start NATS Messenger
-        const messenger = new NatsMessenger('localhost:4222', console)
+        const messenger = new NatsMessenger(testConnectOpts, console)
         await messenger.start()
 
         // Setup the responder to receive and check the test message and reply to the request

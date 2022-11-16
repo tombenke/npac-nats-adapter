@@ -69,13 +69,13 @@ var NatsMessenger = exports.NatsMessenger = function () {
     /**
      * Create a NatsMessenger instance
      *
-     * @param {String} uri - The URI of the NATS server
+     * @param {Config} config - The connect configuration of the NATS server
      * @param {Object} logger - The central logger of the application
      */
-    function NatsMessenger(uri, logger) {
+    function NatsMessenger(config, logger) {
         _classCallCheck(this, NatsMessenger);
 
-        this.uri = uri;
+        this.config = config;
         this.logger = logger;
         this.natsConnection = null;
     }
@@ -97,9 +97,9 @@ var NatsMessenger = exports.NatsMessenger = function () {
                     while (1) {
                         switch (_context.prev = _context.next) {
                             case 0:
-                                this.logger.debug('NatsMessenger.start: Connect to \'' + this.uri + '\'');
+                                this.logger.debug('NatsMessenger.start: Connect to NATS with opts: \'' + JSON.stringify(this.config) + '\'');
                                 _context.next = 3;
-                                return (0, _nats.connect)({ debug: true, servers: this.uri });
+                                return (0, _nats.connect)(this.config);
 
                             case 3:
                                 this.natsConnection = _context.sent;
@@ -258,8 +258,10 @@ var NatsMessenger = exports.NatsMessenger = function () {
                 timeout: timeout,
                 headers: hdrs
             }).then(function (msg) {
-                _this2.logger.debug('NatsMessenger.request.reqCb: msg: ' + msg);
-                reqCb(null, sc.decode(msg.data), hdrsToObj(msg.headers));
+                var data = sc.decode(msg.data);
+                var msgHeaders = hdrsToObj(msg.headers);
+                _this2.logger.debug('NatsMessenger.request.reqCb: msg.data: ' + data + ', headers: ' + JSON.stringify(msgHeaders));
+                reqCb(null, data, msgHeaders);
             }).catch(function (err) {
                 _this2.logger.error('NatsMessenger.request.reqCb: err: ' + err);
                 reqCb(err, null, null);
@@ -328,6 +330,19 @@ var NatsMessenger = exports.NatsMessenger = function () {
         /**
          * Drain the connection to NATS
          *
+         * Draining provides for a graceful way to unsubscribe or close a connection
+         * without losing messages that have already been dispatched to the client.
+         *
+         * In general, you can drain a subscription or all subscriptions in a connection.
+         * When you drain a subscription, the client sends an unsubscribe protocol message to the server followed by a flush.
+         * The subscription handler is only removed after the server responds.
+         * Thus, all pending messages for the subscription have been processed.
+         *
+         * Draining a connection, drains all subscriptions.
+         * However, when you drain the connection it becomes impossible to make new subscriptions or send new requests.
+         * After the last subscription is drained, it also becomes impossible to publish a message.
+         * These restrictions do not exist when just draining a subscription.
+         *
          * @function
          */
 
@@ -360,6 +375,9 @@ var NatsMessenger = exports.NatsMessenger = function () {
 
         /**
          * Flushes the pending messages with NATS
+         *
+         * Flush sends a PING to the server.
+         * When the server responds with PONG you are guaranteed that all pending data was sent and received by the server.
          *
          * @function
          */

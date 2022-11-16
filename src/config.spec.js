@@ -12,7 +12,11 @@ describe('nats.config', () => {
     it('#defaults', (done) => {
         const expected = {
             nats: {
-                uri: 'nats://localhost:4222'
+                debug: false,
+                name: undefined,
+                user: undefined,
+                pass: undefined,
+                servers: ['nats://localhost:4222']
             }
         }
 

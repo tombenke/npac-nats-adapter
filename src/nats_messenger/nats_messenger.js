@@ -29,11 +29,11 @@ export class NatsMessenger {
     /**
      * Create a NatsMessenger instance
      *
-     * @param {String} uri - The URI of the NATS server
+     * @param {Config} config - The connect configuration of the NATS server
      * @param {Object} logger - The central logger of the application
      */
-    constructor(uri, logger) {
-        this.uri = uri
+    constructor(config, logger) {
+        this.config = config
         this.logger = logger
         this.natsConnection = null
     }
@@ -46,8 +46,8 @@ export class NatsMessenger {
      * @function
      */
     async start() {
-        this.logger.debug(`NatsMessenger.start: Connect to '${this.uri}'`)
-        this.natsConnection = await connect({ debug: true, servers: this.uri })
+        this.logger.debug(`NatsMessenger.start: Connect to NATS with opts: '${JSON.stringify(this.config)}'`)
+        this.natsConnection = await connect(this.config)
     }
 
     /**
@@ -152,8 +152,12 @@ export class NatsMessenger {
                 headers: hdrs
             })
             .then((msg) => {
-                this.logger.debug(`NatsMessenger.request.reqCb: msg: ${msg}`)
-                reqCb(null, sc.decode(msg.data), hdrsToObj(msg.headers))
+                const data = sc.decode(msg.data)
+                const msgHeaders = hdrsToObj(msg.headers)
+                this.logger.debug(
+                    `NatsMessenger.request.reqCb: msg.data: ${data}, headers: ${JSON.stringify(msgHeaders)}`
+                )
+                reqCb(null, data, msgHeaders)
             })
             .catch((err) => {
                 this.logger.error(`NatsMessenger.request.reqCb: err: ${err}`)
@@ -206,6 +210,19 @@ export class NatsMessenger {
     /**
      * Drain the connection to NATS
      *
+     * Draining provides for a graceful way to unsubscribe or close a connection
+     * without losing messages that have already been dispatched to the client.
+     *
+     * In general, you can drain a subscription or all subscriptions in a connection.
+     * When you drain a subscription, the client sends an unsubscribe protocol message to the server followed by a flush.
+     * The subscription handler is only removed after the server responds.
+     * Thus, all pending messages for the subscription have been processed.
+     *
+     * Draining a connection, drains all subscriptions.
+     * However, when you drain the connection it becomes impossible to make new subscriptions or send new requests.
+     * After the last subscription is drained, it also becomes impossible to publish a message.
+     * These restrictions do not exist when just draining a subscription.
+     *
      * @function
      */
     async drain() {
@@ -215,6 +232,9 @@ export class NatsMessenger {
 
     /**
      * Flushes the pending messages with NATS
+     *
+     * Flush sends a PING to the server.
+     * When the server responds with PONG you are guaranteed that all pending data was sent and received by the server.
      *
      * @function
      */

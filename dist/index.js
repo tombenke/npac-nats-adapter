@@ -45,11 +45,12 @@ var startup = function () {
                         config = _lodash2.default.merge({}, _config2.default, { nats: container.config.nats || {} });
 
                         container.logger.info('nats: Start up');
-                        messenger = new _nats_messenger.NatsMessenger(config.nats.uri, container.logger);
-                        _context.next = 5;
+                        container.logger.debug('nats: Start up with config: ' + JSON.stringify(config));
+                        messenger = new _nats_messenger.NatsMessenger(config.nats, container.logger);
+                        _context.next = 6;
                         return messenger.start();
 
-                    case 5:
+                    case 6:
 
                         next(null, {
                             config: config,
@@ -57,6 +58,8 @@ var startup = function () {
                                 messenger: messenger,
 
                                 flush: messenger.flush.bind(messenger),
+                                drain: messenger.drain.bind(messenger),
+
                                 publish: messenger.publish.bind(messenger),
                                 subscribe: messenger.subscribe.bind(messenger),
                                 request: messenger.request.bind(messenger),
@@ -64,7 +67,7 @@ var startup = function () {
                             }
                         });
 
-                    case 6:
+                    case 7:
                     case 'end':
                         return _context.stop();
                 }

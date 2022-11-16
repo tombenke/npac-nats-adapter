@@ -19,7 +19,11 @@ describe('nats.config', function () {
     it('#defaults', function (done) {
         var expected = {
             nats: {
-                uri: 'nats://localhost:4222'
+                debug: false,
+                name: undefined,
+                user: undefined,
+                pass: undefined,
+                servers: ['nats://localhost:4222']
             }
         };
 

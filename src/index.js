@@ -24,7 +24,8 @@ const startup = async (container, next) => {
     // Merges the defaults with the config coming from the outer world
     const config = _.merge({}, defaults, { nats: container.config.nats || {} })
     container.logger.info(`nats: Start up`)
-    const messenger = new NatsMessenger(config.nats.uri, container.logger)
+    container.logger.debug(`nats: Start up with config: ${JSON.stringify(config)}`)
+    const messenger = new NatsMessenger(config.nats, container.logger)
     await messenger.start()
 
     next(null, {
@@ -33,6 +34,8 @@ const startup = async (container, next) => {
             messenger: messenger,
 
             flush: messenger.flush.bind(messenger),
+            drain: messenger.drain.bind(messenger),
+
             publish: messenger.publish.bind(messenger),
             subscribe: messenger.subscribe.bind(messenger),
             request: messenger.request.bind(messenger),

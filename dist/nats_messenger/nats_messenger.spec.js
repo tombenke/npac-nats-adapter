@@ -24,6 +24,7 @@ describe('NatsMessenger', function () {
         done();
     });
 
+    var testConnectOpts = { servers: ['nats://localhost:4222'], debug: true };
     var testPayload = { note: 'text...', number: 42, floatValue: 42.24 };
     var topic = 'test-topic';
     var testHeaders = {
@@ -38,7 +39,7 @@ describe('NatsMessenger', function () {
             while (1) {
                 switch (_context.prev = _context.next) {
                     case 0:
-                        messenger = new _nats_messenger.NatsMessenger('nats://localhost:4222', console);
+                        messenger = new _nats_messenger.NatsMessenger(testConnectOpts, console);
 
                         (0, _chai.expect)(messenger).to.not.eql(null);
 
@@ -56,7 +57,7 @@ describe('NatsMessenger', function () {
             while (1) {
                 switch (_context2.prev = _context2.next) {
                     case 0:
-                        messenger = new _nats_messenger.NatsMessenger('nats://localhost:4222', console);
+                        messenger = new _nats_messenger.NatsMessenger(testConnectOpts, console);
                         _context2.next = 3;
                         return messenger.start();
 
@@ -79,7 +80,7 @@ describe('NatsMessenger', function () {
                 switch (_context3.prev = _context3.next) {
                     case 0:
                         // Create and start NATS Messenger
-                        messenger = new _nats_messenger.NatsMessenger('nats://localhost:4222', console);
+                        messenger = new _nats_messenger.NatsMessenger(testConnectOpts, console);
                         _context3.next = 3;
                         return messenger.start();
 
@@ -126,7 +127,7 @@ describe('NatsMessenger', function () {
                 switch (_context4.prev = _context4.next) {
                     case 0:
                         // Create and start NATS Messenger
-                        messenger = new _nats_messenger.NatsMessenger('localhost:4222', console);
+                        messenger = new _nats_messenger.NatsMessenger(testConnectOpts, console);
                         _context4.next = 3;
                         return messenger.start();
 
