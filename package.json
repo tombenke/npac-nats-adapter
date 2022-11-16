@@ -1,7 +1,7 @@
 {
   "name": "npac-nats-adapter",
   "description": "npac adapter with NATS API",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "keywords": [
     "cli",
     "util",
@@ -24,7 +24,7 @@
   "main": "./dist/index.js",
   "dependencies": {
     "lodash": "^4.17.21",
-    "nats":"^2.9.0",
+    "nats": "^2.9.0",
     "npac": "^2.1.11"
   },
   "devDependencies": {
