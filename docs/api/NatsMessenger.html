@@ -28,7 +28,7 @@
 
 <header>
     
-        <h2><span class="attribs"><span class="type-signature"></span></span>NatsMessenger<span class="signature">(servers, logger)</span><span class="type-signature"></span></h2>
+        <h2><span class="attribs"><span class="type-signature"></span></span>NatsMessenger<span class="signature">(config, logger)</span><span class="type-signature"></span></h2>
         
             <div class="class-description"><p>Class representing a NATS connection and implements the Messenger interface</p></div>
         
@@ -45,7 +45,7 @@
     
 
     
-    <h4 class="name" id="NatsMessenger"><span class="type-signature"></span>new NatsMessenger<span class="signature">(servers, logger)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="NatsMessenger"><span class="type-signature"></span>new NatsMessenger<span class="signature">(config, logger)</span><span class="type-signature"></span></h4>
     
 
     
@@ -89,16 +89,13 @@
 
         <tr>
             
-                <td class="name"><code>servers</code></td>
+                <td class="name"><code>config</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">String</span>
-|
-
-<span class="param-type">Array.&lt;String></span>
+<span class="param-type">Config</span>
 
 
             
@@ -108,7 +105,7 @@
 
             
 
-            <td class="description last"><p>The URL(s) of the NATS server(s).</p></td>
+            <td class="description last"><p>The connect configuration of the NATS server</p></td>
         </tr>
 
     
