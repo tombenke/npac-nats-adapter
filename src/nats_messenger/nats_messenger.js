@@ -1,5 +1,3 @@
-require('babel-core/register')
-require('babel-polyfill')
 import { connect, StringCodec, headers } from 'nats'
 
 const objToHdrs = (msgHeadersObj) => {

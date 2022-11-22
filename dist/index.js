@@ -1,27 +1,12 @@
 #!/usr/bin/env node
-
 /*jshint node: true */
 'use strict';
 
-var _nats_messenger = require('./nats_messenger/nats_messenger');
-
-var _config = require('./config');
-
-var _config2 = _interopRequireDefault(_config);
-
-var _lodash = require('lodash');
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
-
-require('babel-core/register');
-require('babel-polyfill');
 //import { connect, StringCodec, headers } from 'nats'
-
-
+var _nats_messenger = require("./nats_messenger/nats_messenger");
+var _config = _interopRequireDefault(require("./config"));
+var _lodash = _interopRequireDefault(require("lodash"));
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 /**
  * The startup function of the nats adapter
  *
@@ -34,51 +19,28 @@ require('babel-polyfill');
  *
  * @function
  */
-var startup = function () {
-    var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(container, next) {
-        var config, messenger;
-        return regeneratorRuntime.wrap(function _callee$(_context) {
-            while (1) {
-                switch (_context.prev = _context.next) {
-                    case 0:
-                        // Merges the defaults with the config coming from the outer world
-                        config = _lodash2.default.merge({}, _config2.default, { nats: container.config.nats || {} });
-
-                        container.logger.info('nats: Start up');
-                        container.logger.debug('nats: Start up with config: ' + JSON.stringify(config));
-                        messenger = new _nats_messenger.NatsMessenger(config.nats, container.logger);
-                        _context.next = 6;
-                        return messenger.start();
-
-                    case 6:
-
-                        next(null, {
-                            config: config,
-                            nats: {
-                                messenger: messenger,
-
-                                flush: messenger.flush.bind(messenger),
-                                drain: messenger.drain.bind(messenger),
-
-                                publish: messenger.publish.bind(messenger),
-                                subscribe: messenger.subscribe.bind(messenger),
-                                request: messenger.request.bind(messenger),
-                                response: messenger.response.bind(messenger)
-                            }
-                        });
-
-                    case 7:
-                    case 'end':
-                        return _context.stop();
-                }
-            }
-        }, _callee, undefined);
-    }));
-
-    return function startup(_x, _x2) {
-        return _ref.apply(this, arguments);
-    };
-}();
+const startup = async (container, next) => {
+  // Merges the defaults with the config coming from the outer world
+  const config = _lodash.default.merge({}, _config.default, {
+    nats: container.config.nats || {}
+  });
+  container.logger.info(`nats: Start up`);
+  container.logger.debug(`nats: Start up with config: ${JSON.stringify(config)}`);
+  const messenger = new _nats_messenger.NatsMessenger(config.nats, container.logger);
+  await messenger.start();
+  next(null, {
+    config: config,
+    nats: {
+      messenger: messenger,
+      flush: messenger.flush.bind(messenger),
+      drain: messenger.drain.bind(messenger),
+      publish: messenger.publish.bind(messenger),
+      subscribe: messenger.subscribe.bind(messenger),
+      request: messenger.request.bind(messenger),
+      response: messenger.response.bind(messenger)
+    }
+  });
+};
 
 /**
  * The shutdown function of the nats adapter
@@ -92,36 +54,15 @@ var startup = function () {
  *
  * @function
  */
-var shutdown = function () {
-    var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(container, next) {
-        return regeneratorRuntime.wrap(function _callee2$(_context2) {
-            while (1) {
-                switch (_context2.prev = _context2.next) {
-                    case 0:
-                        container.logger.info('nats: Shutting down');
+const shutdown = async (container, next) => {
+  container.logger.info('nats: Shutting down');
 
-                        // Drain and close the NATS connection
-                        _context2.next = 3;
-                        return container.nats.messenger.close();
-
-                    case 3:
-                        next(null, null);
-
-                    case 4:
-                    case 'end':
-                        return _context2.stop();
-                }
-            }
-        }, _callee2, undefined);
-    }));
-
-    return function shutdown(_x3, _x4) {
-        return _ref2.apply(this, arguments);
-    };
-}();
-
+  // Drain and close the NATS connection
+  await container.nats.messenger.close();
+  next(null, null);
+};
 module.exports = {
-    defaults: _config2.default,
-    startup: startup,
-    shutdown: shutdown
+  defaults: _config.default,
+  startup: startup,
+  shutdown: shutdown
 };
