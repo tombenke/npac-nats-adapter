@@ -1,4 +1,4 @@
-import { expect } from 'chai'
+import expect from 'expect'
 import sinon from 'sinon'
 
 import { NatsMessenger } from './nats_messenger'
@@ -26,7 +26,7 @@ describe('NatsMessenger', () => {
 
     it('#constructor', async () => {
         const messenger = new NatsMessenger(testConnectOpts, console)
-        expect(messenger).to.not.eql(null)
+        expect(messenger).not.toEqual(null)
     })
 
     it('#start, stop', async () => {
@@ -45,9 +45,9 @@ describe('NatsMessenger', () => {
             const sub = messenger.subscribe(topic, (err, payload, headers) => {
                 console.log(`test: subscribe.callback: payload: ${payload}, headers: ${JSON.stringify(headers)}`)
                 const receivedPayload = JSON.parse(payload)
-                expect(err).to.be.null
-                expect(testPayload).to.eql(receivedPayload)
-                expect(testHeaders).to.eql(headers)
+                expect(err).toEqual(null)
+                expect(testPayload).toEqual(receivedPayload)
+                expect(testHeaders).toEqual(headers)
                 resolve(null)
             })
             console.log(`test: subscribed to ${sub}`)
@@ -78,9 +78,9 @@ describe('NatsMessenger', () => {
                 )} and respond with ${payload}`
             )
             const receivedPayload = JSON.parse(payload)
-            expect(err).to.be.null
-            expect(testPayload).to.eql(receivedPayload)
-            expect(testHeaders).to.eql(headers)
+            expect(err).toEqual(null)
+            expect(testPayload).toEqual(receivedPayload)
+            expect(testHeaders).toEqual(headers)
             return { payload: payload, headers: headers }
         })
 

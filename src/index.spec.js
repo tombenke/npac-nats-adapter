@@ -1,4 +1,4 @@
-import { expect } from 'chai'
+import expect from 'expect'
 import sinon from 'sinon'
 import { addLogger, mergeConfig, removeSignalHandlers, catchExitSignals, npacStart } from 'npac'
 import defaults from './config'
@@ -66,9 +66,9 @@ describe('nats', () => {
             container.logger.info(`Run job to test nats`)
             container.nats.subscribe(topic, (err, payload, headers) => {
                 const receivedPayload = JSON.parse(payload)
-                expect(err).to.be.null
-                expect(testPayload).to.eql(receivedPayload)
-                expect(testHeaders).to.eql(headers)
+                expect(err).toEqual(null)
+                expect(testPayload).toEqual(receivedPayload)
+                expect(testHeaders).toEqual(headers)
                 next(null, null)
             })
             container.nats.publish(topic, JSON.stringify(testPayload), testHeaders)
@@ -97,9 +97,9 @@ describe('nats', () => {
                     `respCb received err: ${err}, request: ${requestPayload} headers: ${JSON.stringify(requestHeaders)}`
                 )
                 const receivedPayload = JSON.parse(requestPayload)
-                expect(err).to.be.null
-                expect(receivedPayload).to.eql(testPayload)
-                expect(requestHeaders).to.eql(testHeaders)
+                expect(err).toEqual(null)
+                expect(receivedPayload).toEqual(testPayload)
+                expect(requestHeaders).toEqual(testHeaders)
                 return { payload: requestPayload, headers: requestHeaders }
             })
 
@@ -115,8 +115,8 @@ describe('nats', () => {
                             receivedPayload
                         )}, headers: ${JSON.stringify(responseHeaders)}`
                     )
-                    expect(receivedPayload).to.eql(testPayload)
-                    expect(err).to.eql(null)
+                    expect(receivedPayload).toEqual(testPayload)
+                    expect(err).toEqual(null)
                     resSub.unsubscribe()
                     next(null, null)
                 }
